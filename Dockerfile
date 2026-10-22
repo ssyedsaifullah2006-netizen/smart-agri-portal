@@ -1,6 +1,12 @@
+# Build and push a deliberately broken v-faulty image (missing index.html)
+docker build -t syedsaifullah/smart-agri-portal:v-faulty -f - . <<EOF
 FROM nginx:alpine
-COPY index.html /usr/share/nginx/html/index.html
+RUN rm -f /usr/share/nginx/html/index.html
 EXPOSE 80
-HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget -q -O /dev/null http://localhost:80/ || exit 1
 CMD ["nginx", "-g", "daemon off;"]
+EOF
+
+docker push syedsaifullah/smart-agri-portal:v-faulty
+
+# Deploy the faulty version to Kubernetes
+kubectl set image deployment/smart-agri-deployment smart-agri-container=syedsaifullah/smart-agri-portal:v-faulty --record=true
