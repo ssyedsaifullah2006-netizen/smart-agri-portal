@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Agriculture & Irrigation Portal</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f4f7f6; color: #333; }
+    header { background: #2e7d32; color: white; padding: 20px; text-align: center; }
+    .container { max-width: 1100px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 12px; border: 1px solid #ddd; text-align: center; }
+    th { background: #1b5e20; color: white; }
+    .alert-badge { background: #d32f2f; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+    .ok-badge { background: #388e3c; color: white; padding: 4px 8px; border-radius: 4px; }
+    .alert-box { background: #ffebee; border-left: 5px solid #d32f2f; padding: 12px; margin-bottom: 15px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Smart Agriculture and Irrigation Resource Optimization Portal</h1>
+    <p>Real-Time Soil Moisture, Crop Health & Schedule Monitoring</p>
+  </header>
+  <div class="container">
+    <div id="alertContainer"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>Field ID</th>
+          <th>Crop Type</th>
+          <th>Soil Moisture (%)</th>
+          <th>Daily Water (L)</th>
+          <th>Temp (°C)</th>
+          <th>Crop Health</th>
+          <th>Next Schedule</th>
+          <th>Irrigation Status</th>
+        </tr>
+      </thead>
+      <tbody id="fieldTable"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const fields = [
+      { id: "FLD-101", crop: "Paddy", moisture: 22, water: 4500, temp: 34, health: "Stressed (Dry)", schedule: "Today 16:00", status: "Required" },
+      { id: "FLD-102", crop: "Sugarcane", moisture: 48, water: 5200, temp: 31, health: "Healthy", schedule: "Tomorrow 06:00", status: "Optimal" },
+      { id: "FLD-103", crop: "Cotton", moisture: 19, water: 3100, temp: 36, health: "Critical Low Moisture", schedule: "Immediate", status: "Required" },
+      { id: "FLD-104", crop: "Groundnut", moisture: 28, water: 2400, temp: 33, health: "Mild Stress", schedule: "Today 17:30", status: "Required" },
+      { id: "FLD-105", crop: "Maize", moisture: 62, water: 2900, temp: 29, health: "Healthy", schedule: "In 2 Days", status: "Optimal" }
+    ];
+
+    const tbody = document.getElementById("fieldTable");
+    const alertDiv = document.getElementById("alertContainer");
+    let lowMoistureFields = [];
+
+    fields.forEach(f => {
+      const isLow = f.moisture < 30;
+      if (isLow) lowMoistureFields.push(`${f.id} (${f.crop}: ${f.moisture}%)`);
+      tbody.innerHTML += `
+        <tr>
+          <td><b>${f.id}</b></td>
+          <td>${f.crop}</td>
+          <td>${f.moisture}%</td>
+          <td>${f.water} L</td>
+          <td>${f.temp}°C</td>
+          <td>${f.health}</td>
+          <td>${f.schedule}</td>
+          <td><span class="${isLow ? 'alert-badge' : 'ok-badge'}">${isLow ? 'ALERT: Irrigate (<30%)' : f.status}</span></td>
+        </tr>`;
+    });
+
+    if (lowMoistureFields.length > 0) {
+      alertDiv.innerHTML = `<div class="alert-box"><b>⚠️ Irrigation Alert (Moisture below 30%):</b> Immediate action required for ${lowMoistureFields.join(", ")}</div>`;
+    }
+  </script>
+</body>
+</html>
