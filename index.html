@@ -2,75 +2,184 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Smart Agriculture & Irrigation Portal</title>
+  <title>Smart Agriculture & Irrigation Optimization Portal</title>
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f4f7f6; color: #333; }
-    header { background: #2e7d32; color: white; padding: 20px; text-align: center; }
-    .container { max-width: 1100px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { padding: 12px; border: 1px solid #ddd; text-align: center; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #eef3f0; color: #2c3e50; }
+    header { background: linear-gradient(135deg, #1b5e20, #388e3c); color: white; padding: 20px; text-align: center; }
+    .container { max-width: 1200px; margin: 20px auto; padding: 20px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+    .kpi-card { background: white; padding: 16px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); border-top: 4px solid #2e7d32; }
+    .kpi-card h4 { margin: 0 0 8px 0; color: #555; font-size: 0.9rem; }
+    .kpi-card .value { font-size: 1.5rem; font-weight: bold; color: #1b5e20; }
+    .panel { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 20px; }
+    .controls { display: flex; gap: 15px; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
+    select, button { padding: 8px 12px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.95rem; }
+    button { background: #2e7d32; color: white; border: none; cursor: pointer; }
+    button:hover { background: #1b5e20; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; border: 1px solid #e0e0e0; text-align: center; }
     th { background: #1b5e20; color: white; }
-    .alert-badge { background: #d32f2f; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
-    .ok-badge { background: #388e3c; color: white; padding: 4px 8px; border-radius: 4px; }
-    .alert-box { background: #ffebee; border-left: 5px solid #d32f2f; padding: 12px; margin-bottom: 15px; }
+    .alert-badge { background: #d32f2f; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; }
+    .ok-badge { background: #388e3c; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; }
+    .done-badge { background: #0288d1; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; }
+    .alert-box { background: #ffebee; border-left: 5px solid #d32f2f; padding: 12px; margin-bottom: 15px; border-radius: 4px; }
+    .priority-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
   </style>
 </head>
 <body>
   <header>
     <h1>Smart Agriculture and Irrigation Resource Optimization Portal</h1>
-    <p>Real-Time Soil Moisture, Crop Health & Schedule Monitoring</p>
+    <p>Field-Wise Water Analytics, Soil Anomaly Detection & Conservation Engine (v2.0)</p>
   </header>
+
   <div class="container">
-    <div id="alertContainer"></div>
-    <table>
-      <thead>
-        <tr>
-          <th>Field ID</th>
-          <th>Crop Type</th>
-          <th>Soil Moisture (%)</th>
-          <th>Daily Water (L)</th>
-          <th>Temp (°C)</th>
-          <th>Crop Health</th>
-          <th>Next Schedule</th>
-          <th>Irrigation Status</th>
-        </tr>
-      </thead>
-      <tbody id="fieldTable"></tbody>
-    </table>
+    <div id="alertBanner"></div>
+
+    <!-- Analytics KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <h4>Total Daily Water Consumption</h4>
+        <div class="value" id="totalWater">0 L</div>
+      </div>
+      <div class="kpi-card" style="border-top-color: #d32f2f;">
+        <h4>Lowest Soil Moisture Field</h4>
+        <div class="value" id="lowestMoistureField" style="color: #d32f2f;">-</div>
+      </div>
+      <div class="kpi-card" style="border-top-color: #0288d1;">
+        <h4>Water-Saving Target (15% Drip Opt.)</h4>
+        <div class="value" id="waterSavingTarget" style="color: #0288d1;">0 L / day</div>
+      </div>
+      <div class="kpi-card">
+        <h4>Irrigation Completion Status</h4>
+        <div class="value" id="completionRate">0 / 0 Completed</div>
+      </div>
+    </div>
+
+    <!-- Filter & Field Table -->
+    <div class="panel">
+      <div class="controls">
+        <label><b>Filter by Field / Status:</b></label>
+        <select id="fieldFilter" onchange="renderDashboard()">
+          <option value="ALL">All Agricultural Fields (5)</option>
+          <option value="LOW">Critical Moisture (&lt;30% Only)</option>
+          <option value="FLD-101">FLD-101 (Paddy)</option>
+          <option value="FLD-102">FLD-102 (Sugarcane)</option>
+          <option value="FLD-103">FLD-103 (Cotton)</option>
+          <option value="FLD-104">FLD-104 (Groundnut)</option>
+          <option value="FLD-105">FLD-105 (Maize)</option>
+        </select>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Field ID</th>
+            <th>Crop Type</th>
+            <th>Soil Moisture (%)</th>
+            <th>Daily Water (L)</th>
+            <th>Saving Target (L)</th>
+            <th>Temp (°C)</th>
+            <th>Soil & Crop Health</th>
+            <th>Next Schedule</th>
+            <th>Irrigation Status</th>
+            <th>Completion Action</th>
+          </tr>
+        </thead>
+        <tbody id="fieldTable"></tbody>
+      </table>
+    </div>
+
+    <!-- Prioritized Recommendation List -->
+    <div class="panel">
+      <h3>Prioritized Irrigation & Water Conservation Recommendations</h3>
+      <div id="priorityList"></div>
+    </div>
   </div>
 
   <script>
     const fields = [
-      { id: "FLD-101", crop: "Paddy", moisture: 22, water: 4500, temp: 34, health: "Stressed (Dry)", schedule: "Today 16:00", status: "Required" },
-      { id: "FLD-102", crop: "Sugarcane", moisture: 48, water: 5200, temp: 31, health: "Healthy", schedule: "Tomorrow 06:00", status: "Optimal" },
-      { id: "FLD-103", crop: "Cotton", moisture: 19, water: 3100, temp: 36, health: "Critical Low Moisture", schedule: "Immediate", status: "Required" },
-      { id: "FLD-104", crop: "Groundnut", moisture: 28, water: 2400, temp: 33, health: "Mild Stress", schedule: "Today 17:30", status: "Required" },
-      { id: "FLD-105", crop: "Maize", moisture: 62, water: 2900, temp: 29, health: "Healthy", schedule: "In 2 Days", status: "Optimal" }
+      { id: "FLD-101", crop: "Paddy", moisture: 22, water: 4500, targetSave: 675, temp: 34, health: "Stressed (Dry Soil)", schedule: "Today 16:00", completed: false },
+      { id: "FLD-102", crop: "Sugarcane", moisture: 48, water: 5200, targetSave: 780, temp: 31, health: "Healthy", schedule: "Tomorrow 06:00", completed: true },
+      { id: "FLD-103", crop: "Cotton", moisture: 19, water: 3100, targetSave: 465, temp: 36, health: "Abnormal High Salinity & Dry", schedule: "Immediate", completed: false },
+      { id: "FLD-104", crop: "Groundnut", moisture: 28, water: 2400, targetSave: 360, temp: 33, health: "Mild Moisture Deficit", schedule: "Today 17:30", completed: false },
+      { id: "FLD-105", crop: "Maize", moisture: 62, water: 2900, targetSave: 435, temp: 29, health: "Optimal", schedule: "In 2 Days", completed: true }
     ];
 
-    const tbody = document.getElementById("fieldTable");
-    const alertDiv = document.getElementById("alertContainer");
-    let lowMoistureFields = [];
-
-    fields.forEach(f => {
-      const isLow = f.moisture < 30;
-      if (isLow) lowMoistureFields.push(`${f.id} (${f.crop}: ${f.moisture}%)`);
-      tbody.innerHTML += `
-        <tr>
-          <td><b>${f.id}</b></td>
-          <td>${f.crop}</td>
-          <td>${f.moisture}%</td>
-          <td>${f.water} L</td>
-          <td>${f.temp}°C</td>
-          <td>${f.health}</td>
-          <td>${f.schedule}</td>
-          <td><span class="${isLow ? 'alert-badge' : 'ok-badge'}">${isLow ? 'ALERT: Irrigate (<30%)' : f.status}</span></td>
-        </tr>`;
-    });
-
-    if (lowMoistureFields.length > 0) {
-      alertDiv.innerHTML = `<div class="alert-box"><b>⚠️ Irrigation Alert (Moisture below 30%):</b> Immediate action required for ${lowMoistureFields.join(", ")}</div>`;
+    function toggleCompletion(id) {
+      const item = fields.find(f => f.id === id);
+      if (item) {
+        item.completed = !item.completed;
+        if (item.completed && item.moisture < 30) item.moisture = 42;
+        renderDashboard();
+      }
     }
+
+    function renderDashboard() {
+      const filter = document.getElementById("fieldFilter").value;
+      const tbody = document.getElementById("fieldTable");
+      tbody.innerHTML = "";
+
+      const filtered = fields.filter(f => {
+        if (filter === "ALL") return true;
+        if (filter === "LOW") return f.moisture < 30;
+        return f.id === filter;
+      });
+
+      let totalWater = 0;
+      let totalSavings = 0;
+      let completedCount = 0;
+      let lowestField = fields[0];
+      let lowAlerts = [];
+
+      fields.forEach(f => {
+        totalWater += f.water;
+        totalSavings += f.targetSave;
+        if (f.completed) completedCount++;
+        if (f.moisture < lowestField.moisture) lowestField = f;
+        if (f.moisture < 30) lowAlerts.push(`${f.id} (${f.crop} - ${f.moisture}%)`);
+      });
+
+      document.getElementById("totalWater").innerText = totalWater.toLocaleString() + " L";
+      document.getElementById("lowestMoistureField").innerText = `${lowestField.id} (${lowestField.moisture}%)`;
+      document.getElementById("waterSavingTarget").innerText = totalSavings.toLocaleString() + " L / day";
+      document.getElementById("completionRate").innerText = `${completedCount} / ${fields.length} Completed`;
+
+      document.getElementById("alertBanner").innerHTML = lowAlerts.length > 0
+        ? `<div class="alert-box"><b>⚠️ CRITICAL IRRIGATION ALERT (Moisture &lt; 30%):</b> ${lowAlerts.join(" | ")}</div>`
+        : `<div class="alert-box" style="background:#e8f5e9;border-color:#2e7d32;"><b>✅ All fields are above the 30% critical soil moisture threshold.</b></div>`;
+
+      filtered.forEach(f => {
+        const isLow = f.moisture < 30;
+        const badgeClass = f.completed ? "done-badge" : (isLow ? "alert-badge" : "ok-badge");
+        const statusText = f.completed ? "Completed" : (isLow ? "ALERT: Irrigate (<30%)" : "Scheduled");
+
+        tbody.innerHTML += `
+          <tr>
+            <td><b>${f.id}</b></td>
+            <td>${f.crop}</td>
+            <td><b>${f.moisture}%</b></td>
+            <td>${f.water.toLocaleString()} L</td>
+            <td>Save ${f.targetSave} L</td>
+            <td>${f.temp}°C</td>
+            <td>${f.health}</td>
+            <td>${f.schedule}</td>
+            <td><span class="${badgeClass}">${statusText}</span></td>
+            <td><button onclick="toggleCompletion('${f.id}')">${f.completed ? 'Reset' : 'Mark Completed'}</button></td>
+          </tr>`;
+      });
+
+      // Prioritized Recommendation List sorted by lowest moisture first
+      const sortedPriority = [...fields].sort((a, b) => a.moisture - b.moisture);
+      const pList = document.getElementById("priorityList");
+      pList.innerHTML = sortedPriority.map((f, idx) => `
+        <div class="priority-item">
+          <span><b>Priority #${idx + 1}: ${f.id} (${f.crop})</b> — Moisture: ${f.moisture}% | Health: ${f.health}</span>
+          <span><b>Action:</b> ${f.moisture < 30 ? 'Switch to pulse drip irrigation immediately; target saving ' + f.targetSave + ' L' : 'Maintain standard schedule; mulch soil to retain moisture'}</span>
+        </div>
+      `).join("");
+    }
+
+    renderDashboard();
   </script>
 </body>
 </html>
